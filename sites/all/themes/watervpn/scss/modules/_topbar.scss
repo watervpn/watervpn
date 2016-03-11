@@ -1,0 +1,56 @@
+.l-header {
+  @media #{$large-up} { 
+    background-color: #333;
+  }
+}
+
+
+.top-bar {
+  @media #{$large-up} { 
+    width: $row-width;
+    margin:0 auto;
+  }
+
+  .toggle-topbar {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .toggle-topbar.menu-icon {
+    left: 15px;
+    top: 50%;
+    margin-top: -16px;
+    padding-left: 0px;
+    width: 70px;
+
+    .left-off-canvas-toggle {
+      padding-left: 23px;
+      &:after {
+        left: 0;
+      }
+    }
+  }
+
+  .title-area .name{
+    text-align: right;
+    width: 200px;
+    margin: 0 auto;
+
+    h1 a {
+      background-image: url("../images/watervpn_logo.png");
+      background-size: 200px;
+      text-indent: 200%;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+
+}
+
+.page .top-bar .top-bar-section {
+	display: none;
+	@media #{$medium-up} { 
+		display: block;
+	}
+}

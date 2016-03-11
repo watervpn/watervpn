@@ -1,0 +1,19 @@
+<?php
+/**
+ * @file
+ * Code for the Basic Page feature.
+ */
+
+include_once 'basic_page.features.inc';
+
+
+/**
+ * Remove front page content.
+ *
+ * Implements hook_preprocess_HOOK().
+ */
+function basic_page_preprocess_page(&$vars) {
+  if(!empty($vars['is_front'])) {
+    unset($vars['page']['content']['system_main']);
+  }
+}

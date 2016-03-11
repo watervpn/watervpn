@@ -1,0 +1,139 @@
+<?php
+/**
+ * @file
+ * Code for the Radius User feature.
+ */
+
+include_once 'radius_user.features.inc';
+
+
+/**
+ * Implements hook_menu().
+ */
+function radius_user_menu() {
+  $items = array();
+
+  $items['renew/%node/%user'] = array(
+    'title' => '',
+    'description' => 'Renew service',
+    'page callback' => 'radius_user_product_renew',
+    'page arguments' => array(1, 2),
+    'access callback' => 'radius_user_porduct_renew_access_callback',
+    'access arguments' => array(1, 2),
+  );
+
+  return $items;
+}
+
+/**
+ * Determine if the user can be renewed or not.
+ * @param Object $node node to be renewed.
+ * @param Object $user user who referencing node.
+ * @return boolean
+ */
+function radius_user_porduct_renew_access_callback($node, $user) {
+  if (user_is_anonymous()) {
+    drupal_set_message(t('Please login to renew your service.'));
+  }
+
+  if (user_is_logged_in() && $GLOBALS['user']->uid == $user->uid && $node->type == 'radius_user') {
+    // TODO also check if the current radius node were referenced by user.
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Adding a radius node to cart for renew.
+ * @param Object $node node to be renewed.
+ * @param Object $user user who referencing node.
+ */
+function radius_user_product_renew($node, $user) {
+  $renew = FALSE;
+  $nid = 0;
+
+  // Get the original product id;
+  // TODO use entity reference to
+
+  $sql = new EntityFieldQuery();
+  $results = $sql->entityCondition('entity_type', 'commerce_product')
+    ->entityCondition('bundle', 'vpn_service')
+    ->propertyCondition('status', 1)
+    ->fieldCondition('field_type', 'value', 'lite')
+//     ->fieldCondition('field_quantity', 'value', 1)
+    ->execute();
+
+  dsm('---');
+  dsm($results);
+}
+
+
+/**
+ * Implements hook_cron().
+ */
+function radius_user_cron() {
+  // load radius user with status is active = 1;
+  // setup a drupal queue api to store loaded radius user;
+  // foreach radius user, batch api.
+  // inside queue excution, check each radius user's expired day against current time.
+  // if current radius user expired, then call web service 'radius' and put it in disable group.
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function radius_user_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'radius_user' && $view_mode == 'teaser') {
+
+    // TODO Only show renew button when only 1 month left;
+    global $user;
+
+    $path_renew =  '/renew/' . $node->nid . '/' .  $user->uid;
+    $path_server = '/servers/' . $node->nid . '/' . $user->uid;
+
+    $options_renew = array(
+      'html' => FALSE,
+      'attributes' => array(
+        'class' => array('button', 'renew'),
+      ),
+      'query' => drupal_get_destination(),
+    );
+
+    $options_server = array(
+      'html' => FALSE,
+      'attributes' => array(
+        'class' => array('button', 'servers'),
+      ),
+      'query' => drupal_get_destination(),
+    );
+
+    $links = array(l(t('Select a Server'), $path_server, $options_server), l(t('Renew'), $path_renew, $options_renew));
+
+    $node->content['buttons'] = array (
+      '#markup' => theme('download_link', array('links' => $links)),
+      '#weight' => 3,
+    );
+
+  }
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ * If we only invoke hook_node_view it won't work.
+ * We have to implement this method, since we are using DS(display suite)
+ * to add buttons to radius_user teaser view mode.
+ * DS only cares about node_view stuff if those fields are exposed in the field UI
+ */
+function radius_user_field_extra_fields() {
+  $extra = array();
+  // Just adding the psuedo field to the page node type.
+  $extra['node']['radius_user']['display'] = array(
+    'buttons' => array(
+      'label' => t('Buttons'),
+      'description' => t('Buttons'),
+      'weight' => -5,
+    ),
+  );
+  return $extra;
+}

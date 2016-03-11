@@ -1,0 +1,26 @@
+.page-cart {
+	.block-store-store-upsale {
+		padding-left: 15px;
+		@media #{$medium-up} {
+			float: right;
+			width: 40%;
+		}
+	
+		.block-title {
+			margin-top: 0;
+			margin-bottom: 30px;
+		}
+	}
+
+	.view-id-commerce_cart_form {
+		
+		@media #{$medium-up} {
+			float: left;
+			width: 60%;
+		}
+
+		.views-table {
+			width: 100%;
+		}
+	}
+}

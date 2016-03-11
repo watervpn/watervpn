@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the WaterVPN Search feature.
+ */
+
+include_once 'watervpn_search.features.inc';

@@ -1,0 +1,21 @@
+.block-views-store-block {
+	width: 100%;
+	.views-row {
+		@media #{$large-up} { 
+	    display: inline-block;
+	    margin-right: 20px;
+	  }
+
+	  img {
+	  	margin: 0 auto;
+	  	display: block;
+	  }
+
+	  .field-name-commerce-price,
+	  .field-name-field-duration,
+	  .field-name-field-product-reference {
+			text-align: center;
+			margin-bottom: 20px;
+	  }
+	}
+}

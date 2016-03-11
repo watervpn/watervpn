@@ -1,0 +1,4 @@
+name = "Web services API"
+description = "Provides web serviecs api"
+core = "7.x"
+package = "WaterVPN"

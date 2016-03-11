@@ -1,0 +1,38 @@
+<?php
+/**
+ * @file
+ * Drupal needs this blank file.
+ */
+
+/**
+ * Implements hook_menu_alter().
+ */
+function customer_menu_alter(&$items) {
+  $items['user/%user/view']['title'] = t('My Account');
+  $items['user/%user/edit']['title'] = t('Change Account Settings');
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ * Change field labels.
+ */
+function customer_preprocess_field(&$vars) {
+  if ($vars['element']['#field_name'] == 'field_status') {
+    if (!empty($vars['element']['#items'][0]['value']) && $vars['element']['#items'][0]['value'] == 1) {
+      $vars['items'][0]['#markup'] = '<span class="active">active</span>';
+    }else {
+      $vars['items'][0]['#markup'] = '<span class="active">expired</span>';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function customer_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_radius_user_reference']['#access'] = FALSE;
+  }
+}

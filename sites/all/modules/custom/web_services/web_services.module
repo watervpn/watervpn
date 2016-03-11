@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * @file
+ * web_services
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function web_services_menu() {
+  $items = array();
+
+  $items['download/%node/%node/%user'] = array(
+    'title' => 'Web Service API',
+    'description' => 'Provide web services api',
+    'page callback' => 'web_services_ovpn_config_download',
+    'page arguments' => array(1, 2, 3),
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_init().
+ */
+function web_services_init() {
+  // path to composer autoloader
+  $auto_load_path = DRUPAL_ROOT . '//vendor/autoload.php';
+
+  require_once $auto_load_path;
+  // path to wvpnclient autoloader
+  require_once __DIR__ . '/includes/webservice-client/Autoloader.php';
+}
+
+/**
+ * Generate open vpn config file.
+ * @param unknown $radius_node
+ * @param unknown $server_node
+ * @param unknown $user
+ */
+function web_services_ovpn_config_download($radius_node, $server_node, $user) {
+  $valid_user = FALSE;
+
+  // Double check if the radius user node is linked to the user.
+  if (!empty($user->field_radius_user_reference[LANGUAGE_NONE]) && !empty($radius_node)) {
+    $raidus_references = $user->field_radius_user_reference[LANGUAGE_NONE];
+    foreach ($raidus_references as $raidus_reference) {
+      if ($raidus_reference['target_id'] == $radius_node->nid) {
+        $valid_user = TRUE;
+        break;
+      }
+    }
+  }
+
+  if ($valid_user) {
+    $openvpn = WvpnClient\WebService::getServiceClient('openvpn');
+
+    // TODO Log error if $openvpn is not avaliable.
+    if (empty($openvpn)) {
+      watchdog('web_services', 'webservice - openvpn not aviable.', NULL, WATCHDOG_CRITICAL);
+    }
+
+    if (!empty($radius_node->field_radius_id[LANGUAGE_NONE][0]['value'])) {
+      $account = $radius_node->field_radius_id[LANGUAGE_NONE][0]['value'];
+    }
+
+    if (!empty($server_node->field_server_name[LANGUAGE_NONE][0]['value'])) {
+      $server = strtolower($server_node->field_server_name[LANGUAGE_NONE][0]['value']);
+    }
+
+    // Generate opven config file base on users account.
+    if (!empty($account) && !empty($server)) {
+      $downloadable = TRUE;
+      $filename = $account . '-config.ovpn';
+
+      $openvpn->getClientConfig($account, $server, $downloadable, $filename);
+    }
+    else {
+      drupal_set_message(t('Can\'t generate configuration file for server @server_id. Please contact us.', array('@server_id' => $server_node->nid)), 'error');
+      watchdog('web_services', 'server config file generate error', NULL, WATCHDOG_ERROR);
+      drupal_goto('/user/'. $user->uid);
+    }
+  }
+  else {
+    drupal_set_message(t('Sorry, somthing went wrong, Please contact us.'), 'error');
+    watchdog('web_services', 'field_radius_user_reference mismatch.', NULL, WATCHDOG_ERROR);
+    drupal_goto('/user/'. $user->uid);
+  }
+
+}

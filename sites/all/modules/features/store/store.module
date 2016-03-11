@@ -1,0 +1,385 @@
+<?php
+/**
+ * @file
+ * Code for the Store feature.
+ */
+
+include_once 'store.features.inc';
+
+/**
+ * Implements hook_node_view().
+ *
+ * Remove read more link from teaser.
+ */
+function store_node_view($node, $view_mode, $langcode) {
+  if ($view_mode == 'teaser') {
+    unset($node->content['links']);
+  }
+}
+
+/**
+ * Implementing hook_commerce_cart_product_prepare()
+ *
+ * Remove order before add anything to cart.
+ */
+function store_commerce_cart_product_prepare($order, $product, $line_item) {
+  commerce_cart_order_empty($order);
+}
+
+/**
+ * Implements hook_commerce_cart_product_add().
+ *
+ * Redirect to cart page after added a new product.
+ */
+function store_commerce_cart_product_add($order, $product, $quantity, $line_item) {
+  global $user;
+
+  if (!empty($order->commerce_line_items[LANGUAGE_NONE])) {
+    drupal_goto('/cart');
+  }
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ * Declear upsale block.
+ */
+function store_block_info() {
+  $blocks['store_upsale'] = array(
+    'info' => t('Upgrade Service'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Return highest price product in current user shopping cart.
+ */
+function store_check_items_in_cart() {
+  global $user;
+
+  $cart = commerce_cart_order_load($user->uid);
+
+  $high_amount = 0;
+  $return_product = NULL;
+
+  if (!empty($cart->commerce_line_items[LANGUAGE_NONE])) {
+    $line_items = $cart->commerce_line_items[LANGUAGE_NONE];
+    foreach($line_items as $line_item){
+      $line_item_id = $line_item['line_item_id'];
+
+      $line_item = commerce_line_item_load($line_item_id);
+      $product_id = $line_item->commerce_product[LANGUAGE_NONE][0]['product_id'];
+
+      $product = commerce_product_load($product_id);
+
+      $current_amount = $product->commerce_price[LANGUAGE_NONE][0]['amount'];
+      $highest_product_sku = $product->sku;
+
+      $highest_product_price = $product;
+
+      if ($current_amount > $high_amount) {
+        $high_amount = $current_amount;
+        $return_product = $product;
+      }
+    }
+  }
+
+  return $return_product;
+}
+
+
+/**
+ * Implements hook_block_view().
+ *
+ * Create the upsales block.
+ */
+function store_block_view($delta = '') {
+  switch ($delta) {
+  	case 'store_upsale':
+  	  $h_product = store_check_items_in_cart();
+  	  $add_to_cart_form = NULL;
+  	  $loaded_amount = 0;
+  	  $amount = 0;
+  	  $title = '';
+
+  	  if (!empty($h_product)) {
+  	    $amount = $h_product->commerce_price[LANGUAGE_NONE][0]['amount'];
+
+  	    // Load 1 year pro plan.
+  	    $sku = '006';
+  	    $product = commerce_product_load_by_sku($sku);
+  	    $title = $product->title;
+
+  	    $loaded_amount = $product->commerce_price[LANGUAGE_NONE][0]['amount'];
+
+  	    $form_id = commerce_cart_add_to_cart_form_id(array($product->product_id));
+  	    $line_item = commerce_product_line_item_new($product);
+  	    $line_item->data['context']['product_ids'] = array($product->product_id);
+  	    $add_to_cart_form = drupal_get_form($form_id, $line_item);
+  	    $add_to_cart_form['submit']['#value'] = t('Upgrade');
+
+  	    $block['subject'] = t('Upgrade Service');
+  	  }
+
+  	  $block['content'] = theme('store_upsale_block', array(
+	      'add_to_cart_form' => $add_to_cart_form,
+	      'saving' => commerce_currency_format($loaded_amount - $amount, 'USD'),
+	      'plan' => strtolower($title),
+  	  ));
+  	  return $block;
+  	  break;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function store_theme() {
+  return array(
+    'store_upsale_block' => array(
+      'variables' => array(
+        'add_to_cart_form' => NULL,
+        'saving' => NULL,
+        'plan' => NULL,
+      ),
+      'template' => 'store-upsale--block',
+      'path' => drupal_get_path('module', 'store') . '/templates',
+    )
+  );
+}
+
+/**
+ * Implement hook_rules_action_info()
+ *
+ * Declare any meta data about actions for Rules
+ */
+function store_rules_action_info() {
+  $actions = array(
+    'store_actions_vpn_account_setup' => array(
+      'label' => t('Create Drupal User, Radius User and link them together'),
+      'group' => t('VPN'),
+      'parameter' => array(
+        'commerce_order' => array(
+          'type' => 'commerce_order',
+          'label' => t('Commerce Order'),
+        ),
+      ),
+    ),
+  );
+
+  return $actions;
+}
+
+/**
+ * Rules call back function.
+ * @param obj $commerce_order
+ */
+function store_actions_vpn_account_setup($commerce_order) {
+  // Don't create user if user already logged in.
+  global $user;
+
+  if (empty($user->uid)) {
+    // TODO Check anonymous user's email address via ajax call, if email address in use, shown form error.
+    $uid = store_create_drupal_user($commerce_order);
+  }
+  else {
+    $uid = $user->uid;
+  }
+
+  $radius_user_node_nid = store_create_radius_user_node($uid, $commerce_order);
+  // link user together.
+  store_link_drupal_radius_user($uid, $radius_user_node_nid);
+
+  // Newly created user.
+  $user = user_load($uid);
+  $radius_node = node_load($radius_user_node_nid);
+
+  $radius_user_uid = $radius_node->field_radius_id[LANGUAGE_NONE][0]['value'];
+
+  // Load radius user via REST;
+  try{
+    $radius = WvpnClient\WebService::getServiceClient('radius');
+    $response = $radius->getAccount($radius_user_uid);
+    $response = $response->json();
+  }catch( WvpnClient\Exception\EntityNotFoundException $e ){
+    echo "Account Not found ". $e->getMessage();
+  }
+  catch( GuzzleHttp\Exception\ClientException $e){
+    echo "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]";
+  }
+
+  $raidus_user_name = $radius_user_uid;
+  $radius_user_pw = $response['passwd'];
+  $drupal_user = '';
+
+  $to = $user->mail; // new user's email.
+  $params = array(
+  	'body' => "<p>Hello $user->name </p><p>Your VPN account is: $radius_user_uid</p><p>Your password: $radius_user_pw</p>",
+  );
+
+  drupal_mail('store', 'watervpn_store_create_account', $to, user_preferred_language($user), $params);
+}
+
+function store_link_drupal_radius_user($uid, $radius_user_uid) {
+  $user = user_load($uid);
+
+  // Save existing radius users for the current drupal user.
+//   $radius_user_existed_uids = $user->field_radius_user_reference[LANGUAGE_NONE];
+  $user->field_radius_user_reference[LANGUAGE_NONE][]['target_id'] = $radius_user_uid;
+//   $user->field_radius_user_reference[LANGUAGE_NONE][0]['target_id'] = $radius_user_uid;
+
+  user_save($user);
+}
+
+
+/**
+ * Create radius user.
+ */
+function store_create_radius_user_node($uid, $commerce_order) {
+  $r_user = new stdClass();
+  $r_user->title = $commerce_order->mail;
+  $r_user->type = "radius_user";
+  node_object_prepare($r_user); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+  $r_user->language = LANGUAGE_NONE;
+  $r_user->uid = 1;
+  $r_user->status = 1;
+  $r_user->promote = 0;
+
+  if (!empty($commerce_order->commerce_line_items[LANGUAGE_NONE][0]['line_item_id'])) {
+    $line_item_id = $commerce_order->commerce_line_items[LANGUAGE_NONE][0]['line_item_id'];
+    $line_item = commerce_line_item_load($line_item_id);
+
+    if (!empty($line_item->commerce_product[LANGUAGE_NONE][0]['product_id'])) {
+      $product_id = $line_item->commerce_product[LANGUAGE_NONE][0]['product_id'];
+      $product = commerce_product_load($product_id);
+
+      if (!empty($product->field_duration[LANGUAGE_NONE][0]['value'])) {
+        $duration_day = $product->field_duration[LANGUAGE_NONE][0]['value'];
+        $expired_date = strtotime('+' . $duration_day . ' days');
+      }
+    }
+  }
+
+  // create a radius user base on drupal user id.
+  $radius_user = store_create_radius_user($uid);
+
+  $r_user->field_radius_id[LANGUAGE_NONE][0]['value'] = $radius_user['id'];
+  $r_user->field_expiry_date[LANGUAGE_NONE][0]['value'] = $expired_date;
+  $r_user->field_status[LANGUAGE_NONE][0]['value'] = 1;
+
+  try {
+    node_save($r_user);
+  }
+  catch (Exception $e) {
+    watchdog('store', 'Radius user created failed. ' . $e->getMessage());
+  }
+
+  return $r_user->nid;
+}
+
+/**
+ * Create Drupal user base on radius user id.
+ * @param int $r_user_nid
+ *  The radius user node nid.
+ */
+function store_create_drupal_user($commerce_order) {
+  $password = user_password();
+
+  $new_user = array(
+    'name' => $commerce_order->mail,
+    'pass' => $password,
+    'mail' => $commerce_order->mail,
+    'status' => 1,
+    'init' => $commerce_order->mail,
+    'roles' => array(
+      DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+    ),
+  );
+
+  // The first parameter is sent blank so a new user is created.
+  $new_user = user_save('', $new_user);
+
+  // email password and account info later.
+  if (empty($new_user)) {
+    watchdog('store', 'Create drupal user failed.');
+  }
+
+  return $new_user->uid;
+}
+
+/**
+ * Create radius user baes on drupal's user id.
+ * @param unknown $uid
+ */
+function store_create_radius_user($uid) {
+  $radius = WvpnClient\WebService::getServiceClient('radius');
+
+//   $account_name = 'vpn_' . store_get_hashid($uid);
+
+  // Use random number instead of hashid, since we don't want unique radius user id for each drupal user.
+  $account_name = 'vpn_' . store_gen_rand();
+
+  $password = store_gen_rand();
+
+  $id = $account_name;
+  $data = array(
+    "id"  => $id,
+    "passwd"  => $password,
+    "status"  => "1",
+    "groups"  => array("pro"), // TODO update this to lite or pro base on purchase.
+  );
+
+  try{
+    $response = $radius->createAccount($id, $data);
+  }catch( WvpnClient\Exception\EntityAlreadyExsitException $e ){
+    watchdog('store', 'created radius account failed, user already existed.');
+    return store_create_radius_user($uid);
+  }
+  catch( GuzzleHttp\Exception\ClientException $e){
+    $message = "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]";
+    watchdog('store', $message);
+  }
+
+  return $response->json();
+}
+
+/**
+ * Generate 6 random digit.
+ * @param number $length
+ * @return number
+ */
+function store_gen_rand($length = 6) {
+  $result = '';
+
+  for ($i = 0; $i < $length; $i++) {
+    $result .= mt_rand(0, 9) . '';
+  }
+  return (int) $result;
+}
+
+/**
+ * Encode the given value as hashid.
+ * @param string $value
+ * @param number $length
+ * @return string hashed value.
+ */
+function store_get_hashid($value, $length = 8) {
+  // default sale = seasalt.
+  /* @var $hashids Hashids\Hashids */
+  $hashids = new Hashids\Hashids('seasalt', $length);
+
+  return $hashids->encode($value);
+}
+
+/**
+ * Implements hook_mail().
+ */
+function store_mail($key, &$message, $params) {
+  if ($key == 'watervpn_store_create_account') {
+    // Setting email subject and body.
+    $message['subject'] = 'Welcome to watervpn';
+    $message['body'] = array($params['body']);
+  }
+}

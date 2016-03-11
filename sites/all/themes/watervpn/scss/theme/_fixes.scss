@@ -1,0 +1,34 @@
+// Fixing fundation admin menu, large font issue.
+#admin-menu-wrapper, #admin-menu-wrapper ul {
+  font-size: 11px;
+}
+ 
+//@TODO Fixing admin menu overlapes with top menu bar after login.
+
+// Fixed penlizer content selection modal layout issue.
+#modal-content {
+	.panels-section-columns {
+		float: none;
+	}
+}
+
+#modalContent {
+	.close {
+		line-height: 1rem;
+	}
+}
+
+.panels-section-column .content-type-button span {
+	top: 0;
+}
+
+.panels-ipe-placeholder {
+	.panels-ipe-newblock {
+		ul {
+			margin-bottom: 0;
+		}
+		li {
+			display: inline-block;
+		}
+	}
+}

@@ -1,0 +1,169 @@
+// Make slider responsive.
+// .views_slideshow_cycle_main {
+//   width: 100%;
+//   float: left;
+
+//   .views-slideshow-cycle-main-frame {
+//     width: 100% !important;
+//     height: auto;
+//   }
+
+//   .views-slideshow-cycle-main-frame-row {
+//     width: 100% !important;
+//     height: auto;
+//   }
+//   .field-content {
+//     max-width: 100%;
+//     width: 100%;
+
+//     img {
+//       max-width: 100%;
+//       width: 100%;
+//       height: auto;
+//       margin: 0;
+//       padding: 0;
+//     }
+//   }
+// }
+
+// Fix slideshow hidden issue after user login.
+// .logged-in {
+//   .views-slideshow-cycle-main-frame {
+//     height: 645px;
+//   }
+// }
+
+// Style the slideshow controls.
+// .views-slideshow-controls-bottom {
+//   position : relative;
+
+//   #views_slideshow_controls_text_pause_slider-block {
+//     display: none;
+//   }
+
+//   #views_slideshow_controls_text_slider-block {
+//     position : absolute;
+//     top: 20%;
+//     width: 100%;
+//     z-index: 10;
+
+//     @media #{$medium-up} {
+//       top: 50%;
+//     }
+
+//     #views_slideshow_controls_text_previous_slider-block,
+//     #views_slideshow_controls_text_next_slider-block {
+//       a {
+//         @include hide-text();
+//         display: block;
+//         width: 55px;
+//         height: 84px;
+//       }
+//     }
+
+//     #views_slideshow_controls_text_previous_slider-block {
+//       float: left;
+//       a {
+//         background: url("../images/icons/icon-arrow-left.png") no-repeat;
+//       }
+//     }
+
+//     #views_slideshow_controls_text_next_slider-block {
+//       float: right;
+//       a {
+//         background: url("../images/icons/icon-arrow-right.png") no-repeat;
+//       }
+//     }
+//   }
+// }
+
+// Teaser view mode. Fluid two column stacked
+.node-slide.node-teaser {
+  .field-name-title h2 {
+    font-size: rem-calc(28);
+    line-height: rem-calc(50);
+    font-weight: 700;
+    text-align: center;
+    @media #{$medium-up} {
+      font-size: rem-calc(42);
+      line-height: rem-calc(58);
+    }
+  }
+
+  .body h3 {
+    font-size: rem-calc(21);
+    line-height: rem-calc(29);
+    font-weight: 200;
+    text-align: center;
+
+    padding-top: 10px;
+  }
+
+  @media #{$medium-up} {
+    position: relative;
+  }
+  .group-header {
+    // @media #{$medium-up} {
+    //   position: absolute;
+    //   // top: 0;
+    //   bottom: 0;
+    // }
+  }
+
+  .group-footer {
+    color: #FFF;
+    p, h1, h2, h3, h4 {
+      color: #FFF;
+    }
+
+    h2 {
+      font-size: rem-calc(100);
+      line-height: rem-calc(120);
+      font-weight: 300;
+      text-transform: uppercase;
+      margin-bottom: 34px;
+    }
+
+    h3, p {
+      line-height: rem-calc(35);
+    }
+
+    @media #{$medium-up} {
+      position: absolute;
+      top: 15%;
+      max-width: $row-width;
+      margin: 0 19%;
+    }
+
+    padding: rem-calc(10px);
+  }
+}
+
+.hl {
+  position: relative;
+  display: inline-block;
+  font-size: inherit;
+
+  &::before {
+    content: "";
+    border-bottom: 6px solid $w_blue;
+    width: 100%;
+    position: absolute;
+    right: 0px;
+    top: 100%;
+    padding-bottom: 2px;
+  }
+}
+
+
+
+.flexslider {
+  border: 0;
+
+  .flex-direction-nav {
+    li a {
+      height: 60px;
+      padding-bottom: 20px;
+    }
+  }
+}

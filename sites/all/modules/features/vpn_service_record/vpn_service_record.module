@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the VPN Service Record feature.
+ */
+
+include_once 'vpn_service_record.features.inc';

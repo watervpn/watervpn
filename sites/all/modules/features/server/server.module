@@ -1,0 +1,229 @@
+<?php
+/**
+ * @file
+ * Code for the Server feature.
+ */
+
+include_once 'server.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function server_menu() {
+  $items = array();
+
+  $items['admin/config/watervpn'] = array(
+    'title' => t('WaterVPN'),
+    'description' => 'Watervpn settings and maintenances.',
+    'position' => 'left',
+    'weight' => 0,
+    'page callback' => 'server_test_page',
+    'access arguments' => array('access administration pages'),
+  );
+
+  $items['admin/config/watervpn/servers'] = array(
+    'title' => t('Maintenances'),
+    'description' => 'Update servers status.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('server_update_servers_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'server.batch.inc',
+    'weight' => -20,
+  );
+
+  return $items;
+}
+
+function server_test_page() {
+
+  $user = user_load(84);
+dsm($user);
+  // Save existing radius users for the current drupal user.
+//   $radius_user_existed_uids = $user->field_radius_user_reference[LANGUAGE_NONE][0]['target_id'];
+
+  return '';
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function server_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'server' && $view_mode == 'teaser') {
+
+    $arg0 = arg(0);
+    // Load radius node from url.
+    if (!empty($arg0) && $arg0 == 'servers') {
+      $radius_node = node_load(arg(1));
+      global $user;
+
+      $path =  '/download/' . $radius_node->nid . '/' . $node->nid . '/' . $user->uid;
+      $options = array(
+      	'html' => FALSE,
+        'attributes' => array(
+      	  'class' => array('button', 'download'),
+        ),
+        'query' => drupal_get_destination(),
+      );
+
+      $links = array(l(t('Download Config File'), $path, $options));
+
+      $node->content['buttons'] = array (
+        '#markup' => theme('download_link', array('links' => $links)),
+        '#weight' => 3,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ * If we only invoke hook_node_view it won't work.
+ * We have to implement this method, since we are using DS(display suite)
+ * DS only cares about node_view stuff if those fields are exposed in the field UI
+ */
+function server_field_extra_fields() {
+  $extra = array();
+  // Just adding the psuedo field to the page node type.
+  $extra['node']['server']['display'] = array(
+    'buttons' => array(
+      'label' => t('Buttons'),
+      'description' => t('Buttons'),
+      'weight' => -5,
+    ),
+  );
+  return $extra;
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function server_theme($existing, $type, $theme, $path) {
+  return array(
+    'download_link' => array(
+    )
+  );
+}
+
+/**
+ * Create the unorder list.
+ * @param array $vars variables passed by theme() function.
+ * @return string
+ */
+function theme_download_link($vars) {
+  $list_item = '';
+
+  if (!empty($vars['links'])) {
+    foreach ($vars['links'] as $link) {
+      $list_item .= '<li>' . $link . '</li>';
+    }
+  }
+
+  return '<ul class="buttons-group">' . $list_item . '</ul>';
+}
+
+
+
+/**
+ * Get all server nodes from db.
+ * @return mixed
+ *  array contains server node ids or FALSE when failed.
+ */
+function server_get_server_nodes() {
+  // Query all server nodes.
+  $query = db_select('node', 'n')
+  ->fields('n', array('nid'))
+  ->condition('n.type', 'server');
+
+  $server_nodes = $query->execute()->fetchAll();
+
+  return !empty($server_nodes) ? $server_nodes : FALSE;
+}
+
+/**
+ * The batch process function for server node type,
+ * This function need to be in the module file, don't put it in
+ * the server.batch.inc file, or it will failed silently.
+ * @param unknown $server_nodes
+ * @param unknown $context
+ */
+function server_process_server_nodes($server_nodes, &$context) {
+  // How many server nodes we want to process each time.
+  $limit = 5;
+
+  // Update server nodes status.
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['title'] = '';
+    $context['sandbox']['max'] = count($server_nodes);
+    // The starting point the the array.
+    $start = 0;
+  }
+  else {
+    $start = $context['sandbox']['progress'];
+  }
+
+  // Only take a chunk of the nodes to process at a time.
+  $server_nodes_section = array_slice($server_nodes, $start, $limit);
+
+  // Process them.
+  if($context['sandbox']['progress'] < $context['sandbox']['max']){
+
+    foreach ($server_nodes_section as $server_node) {
+      // TODO Update server nodes contents here.
+      server_update_node($server_node->nid);
+
+      // Have to keep track of progress, or we end up in a infinity loop.
+      $context['sandbox']['progress']++;
+      $context['results'][] = check_plain($node->title); // Keep a running tab of all of the nodes created.
+      $context['message'] = $context['sandbox']['progress'] . " of " . $context['sandbox']['max'];
+    }
+  }
+
+  // Check if the batch is finished
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Programatically update server node's properties.
+ */
+function server_update_node($nid) {
+  $node = node_load($nid);
+  if ($node->type == 'server') {
+    // TODO call webservices to update properties.
+
+//     node_save($node);
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function server_cron() {
+  $radius_nodes = server_get_server_nodes();
+  $queue = DrupalQueue::get('servers');
+  foreach($radius_nodes as $radius_node) {
+    $queue->createItem($radius_node->nid);
+  }
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function server_cron_queue_info() {
+  $queues['servers'] = array(
+    'worker callback' => 'server_queue_run', // The callback function for each queue item.
+    'time' => 60, // The max run time per cron run in seconds.
+  );
+  return $queues;
+}
+
+/**
+ * The callback function for each queue item
+ * @param $nid node id.
+ */
+function server_queue_run($nid) {
+  server_update_node($nid);
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the VPN User feature.
+ */
+
+include_once 'vpn_user.features.inc';

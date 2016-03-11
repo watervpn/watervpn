@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Html mail feature.
+ */
+
+include_once 'html_mail.features.inc';

@@ -1,0 +1,220 @@
+$e_orange: #FF9E00;
+
+// $e_orange: #0985c5;
+$e_orange_lite: #F2CD88;
+$e_grey: #4A4A4A;
+
+body {
+	font-family: Helvetica, Helvetica Neue, Arial, sans-serif;
+	font-size: 18px;
+	line-height: 26px;
+	text-align: left;
+	
+	a,
+	p a,
+	div p a {
+		font-size: 18px;
+		line-height: 26px;
+		color: $e_orange;
+		text-decoration: none;
+	}
+
+	h1 {
+		font-size: 36px;
+		line-height: 43px;
+		font-weight: normal;
+		text-align: left;
+		color: $e_grey;
+	}
+
+	h2 {
+		font-size: 32px;
+		line-height: 38px;
+		font-weight: normal;
+		text-align: left;
+		color: $e_grey;
+
+		a {
+			font-size: 24px;
+			line-height: 30px;
+		}
+	}
+
+	h3 {
+		font-size: 18px;
+		line-height: 30px;
+		font-weight: bold;
+		text-align: left;
+		color: $e_grey;
+	}
+
+	p {
+		font-size: 18px;
+		line-height: 26px;
+		text-align: left;
+		color: $e_grey;
+	}
+
+	hr {
+		background-color: #979797;
+		height: 0px;
+		margin-bottom: 24px;
+	}
+
+	.bg-green {
+		background-color: #ECFFD7;
+	}
+
+	.bg-purple {
+		background-color: #F6F6F6;
+	}
+
+	.bg-orange {
+		background-color: #FFF3DC;
+	}
+
+	.font-orange {
+		color: $e_orange;
+	}
+
+	.clear-fix {
+		clear: both;
+	}
+}
+
+table {
+  border-collapse: collapse;
+}
+
+#emailContainer .head {
+	width: 600px;
+	height: 127px;
+	border-top: 8px solid $e_orange;
+	border-bottom: 8px solid $e_orange;
+}
+
+.logo {
+	margin-top: 25px;
+	margin-bottom: 25px;
+	margin: 0 auto;
+	display: block;
+}
+
+.bg-grey {
+	background-color: #5E5E5E;
+	padding: 13px 52px 52px 56px;
+
+	h1 {
+		color: #FFF;
+	}
+
+	p {
+		color: #FFF;
+	}
+}
+
+.bg-white {
+	background-color: #FFF;
+	padding: 13px 52px 52px 56px;
+}
+
+#emailBody {
+	background-color: #FFF;
+	border-bottom: 1px solid #D9D9D9;
+}
+
+.themed-table {
+	border: 1px solid $e_orange_lite;
+	.thead {
+		border-bottom: 3px solid $e_orange_lite;
+		font-size: 18px;
+		line-height: 21px;
+	}
+
+	td {
+		border: 1px solid $e_orange_lite;
+		color: $e_grey;
+		padding: 15px 30px;
+		font-size: 16px;
+		line-height: 22px;
+	}
+
+	.col-1 {
+		width: 23%;
+		padding: 15px 10px;
+	}
+}
+
+#emailFooter {
+	.footer-container {
+		margin-top: 20px;
+		margin-bottom: 20px;
+	}
+
+	h3 {
+		font-weight: normal;
+	}
+
+	ul {
+		padding: 0;
+		li {
+			width: 40px;
+			height: 40px;
+			list-style: none;
+			float: left;
+		}
+	}
+
+	.links,
+	.social,
+	.extra {
+		float: left;
+	}
+
+	.links {
+		li {
+			width: 100%;
+			height: 20px;
+			margin: 0;
+			margin-top: 10px;
+			padding-top: 0px;
+			padding-right: 10px;
+			font-size: 16px;
+			line-height: 19px;
+		}
+	}
+
+	.social {
+		li {
+			margin: 0;
+		 	margin-right: 20px;
+		}
+
+		img {
+			width: 40px;
+			height: 40px;
+		}
+	}
+
+	.links {
+		width: 25%;
+		margin-left: 40px;
+
+		ul {
+			li {
+				float: none;
+			}
+		}
+	}
+
+	.extra img {
+		width: 200px;
+	}
+
+}
+
+.copyright {
+	text-align: center;
+	font-size: 16px;
+	line-height: 19px;
+}

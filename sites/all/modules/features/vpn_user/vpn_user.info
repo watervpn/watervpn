@@ -1,0 +1,10 @@
+name = VPN User
+core = 7.x
+package = User
+dependencies[] = commerce_order
+dependencies[] = ctools
+dependencies[] = ds
+features[ctools][] = ds:ds:1
+features[ds_layout_settings][] = user|user|default
+features[features_api][] = api:2
+project path = sites/all/modules/features

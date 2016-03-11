@@ -1,0 +1,196 @@
+// Non-modular or client styles for the .l-content region.
+// Homepage elements.
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic);
+
+.w_feature {
+	min-height: 450px;
+}
+
+.block-title {
+  border-left: 8px solid $w_blue;
+  padding: 0 0 0 24px;
+  margin: 12px 0 48px;
+  margin-top: 80px;
+}
+
+.bg1 {
+	border-bottom: 1px solid #dedcd7;
+	background: #FFF;
+}
+
+.bg2 {
+	border-bottom: 1px solid #dedcd7;
+	background: #f4f2ed;
+
+	.block-title,
+	.body {
+		text-align: right;
+		float: right;
+	}
+
+	.block-title {
+		border-left: 0;
+		padding: 0 24px 0 0;
+		border-right: 8px solid $w_blue;
+	}
+
+	.body p {
+		text-align: right;
+		width: 50%;
+		float: right;
+	}
+}
+
+.bg3 {
+	
+}
+
+
+.feature-bg1 {
+	background: url("../images/bgs/logos.png") no-repeat bottom right;
+	background-size: 30%;
+}
+
+.feature-bg2 {
+	background: url("../images/bgs/tb_connect.png") no-repeat top left;
+	background-size: 50%;
+}
+
+.feature-bg3 {
+	background: url("../images/bgs/all_devices.jpg") no-repeat bottom right;
+	background-size: 40%;
+}
+
+
+.w_diagrams {
+	background-color: $w_blue_dark;
+	color: #FFF;
+	text-align: center;
+
+		background: url("../images/bgs/Triangulation_Mosaic_3_mariannizmo.jpg") no-repeat;
+	background-size: 100%;
+
+	background-attachment: fixed;
+	background-position: center center;
+	background-size: cover;
+
+
+	h4 {
+		color: #FFF;
+		margin-bottom: 0;
+		font-weight: bold;
+	}
+
+	h4 + p {
+		margin: 0;
+		font-size: rem-calc(18);
+	}
+
+	.columns {
+		margin-top: 30px;
+		margin-bottom: 30px;
+	}
+
+	img {
+		margin: 20px 0 ;
+	}
+}
+
+.w_promo {
+	background-color: $w_red;
+
+	.promo-header {
+		padding-top: 250px;
+		h2, h3 {
+			color: yellow;
+			text-align: center;
+		}
+		h2 {
+			font-size: rem-calc(48);
+		}
+		h3 {
+			margin-bottom: 50px;
+		}
+	}
+
+	.promo-block:not(.last-childen) {
+		border-right: 1px dashed #F7CBCB;
+
+	}
+
+	.promo-block {
+		color: #F7EFEF;
+		h4, p {
+			font-size: rem-calc(13);
+		}
+		margin-bottom: 50px;
+	}
+	
+}
+
+
+.w_business {
+	background: url("../images/bgs/bg1.jpg") no-repeat;
+	background-size: 100%;
+
+	background-attachment: fixed;
+	background-position: center center;
+	background-size: cover;
+
+	.header, .body {
+		h2, h3, p, a {
+			color: #FFF;
+			font-weight: 300;
+		}
+		h2 {
+			font-size: rem-calc(55);
+			font-weight: 300;
+		}
+	}
+
+	.header {
+		margin-top: 250px;
+	}
+
+	.body {
+		margin-bottom: 250px;
+	}
+}
+
+.w_policy {
+	text-align: center;
+	.header, .body {
+		h2, h3, p, a {
+			color: #333;
+			font-weight: 300;
+		}
+		h2 {
+			font-size: rem-calc(35);
+		}
+
+		.icon {
+			background: url("../images/bgs/100sfg.jpg") no-repeat;
+			width: 225px;
+			height: 225px;
+			display: block;
+			margin: 0 auto;
+			margin-top: 120px;
+		}
+	}
+
+	.body {
+		margin-bottom: 120px;
+	}
+}
+
+.w_services {
+	margin-top: 100px;
+	margin-bottom: 100px;
+	.body {
+		margin-top: 50px;
+		.product_container {
+			margin: 0 auto;
+			float: none;
+		}
+	}
+}

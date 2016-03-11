@@ -1,0 +1,16 @@
+name = WaterVPN Search
+core = 7.x
+package = WaterVPN
+dependencies[] = ctools
+dependencies[] = entity
+dependencies[] = panels_mini
+dependencies[] = search_api
+dependencies[] = search_api_solr
+features[ctools][] = panels_mini:panels_default:1
+features[features_api][] = api:2
+features[panels_mini][] = search
+features[panels_mini][] = server
+features[search_api_index][] = node_index
+features[search_api_index][] = server_index
+features[search_api_server][] = solr_server
+project path = sites/all/modules/features

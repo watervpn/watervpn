@@ -1,0 +1,15 @@
+name = Home
+core = 7.x
+package = Layout
+dependencies[] = boxes
+dependencies[] = context
+dependencies[] = ctools
+dependencies[] = views
+features[box][] = cta_box_1
+features[box][] = cta_box_2
+features[box][] = cta_box_3
+features[context][] = home_page
+features[ctools][] = boxes:box:1
+features[ctools][] = context:context:3
+features[features_api][] = api:2
+project path = sites/all/modules/features
