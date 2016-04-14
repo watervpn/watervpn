@@ -54,3 +54,12 @@
 		display: block;
 	}
 }
+
+// Hide sign in button after logged in.
+.logged-in {
+  #secondary-menu {
+    li:nth-child(2) {
+      display: none;
+    }
+  }
+}

@@ -64,17 +64,133 @@ function radius_user_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'field_bundle_settings_node__radius_user';
   $strongarm->value = array(
-    'view_modes' => array(),
+    'view_modes' => array(
+      'teaser' => array(
+        'custom_settings' => TRUE,
+      ),
+      'full' => array(
+        'custom_settings' => FALSE,
+      ),
+      'rss' => array(
+        'custom_settings' => FALSE,
+      ),
+      'search_index' => array(
+        'custom_settings' => FALSE,
+      ),
+      'search_result' => array(
+        'custom_settings' => FALSE,
+      ),
+      'diff_standard' => array(
+        'custom_settings' => FALSE,
+      ),
+      'token' => array(
+        'custom_settings' => FALSE,
+      ),
+      'revision' => array(
+        'custom_settings' => FALSE,
+      ),
+    ),
     'extra_fields' => array(
       'form' => array(
         'title' => array(
           'weight' => '0',
         ),
         'path' => array(
-          'weight' => '2',
+          'weight' => '3',
         ),
       ),
-      'display' => array(),
+      'display' => array(
+        'buttons' => array(
+          'teaser' => array(
+            'weight' => '4',
+            'visible' => TRUE,
+          ),
+          'default' => array(
+            'weight' => '3',
+            'visible' => TRUE,
+          ),
+        ),
+        'product:sku' => array(
+          'default' => array(
+            'weight' => '5',
+            'visible' => FALSE,
+          ),
+          'teaser' => array(
+            'weight' => '15',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:title' => array(
+          'default' => array(
+            'weight' => '6',
+            'visible' => FALSE,
+          ),
+          'teaser' => array(
+            'weight' => '16',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:status' => array(
+          'default' => array(
+            'weight' => '7',
+            'visible' => FALSE,
+          ),
+          'teaser' => array(
+            'weight' => '20',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:commerce_price' => array(
+          'default' => array(
+            'weight' => '8',
+            'visible' => TRUE,
+          ),
+          'teaser' => array(
+            'weight' => '17',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:field_duration' => array(
+          'default' => array(
+            'weight' => '9',
+            'visible' => TRUE,
+          ),
+          'teaser' => array(
+            'weight' => '19',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:field_type' => array(
+          'default' => array(
+            'weight' => '7',
+            'visible' => TRUE,
+          ),
+          'teaser' => array(
+            'weight' => '18',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:field_node_type' => array(
+          'default' => array(
+            'weight' => '10',
+            'visible' => TRUE,
+          ),
+          'teaser' => array(
+            'weight' => '21',
+            'visible' => FALSE,
+          ),
+        ),
+        'product:field_operation' => array(
+          'default' => array(
+            'weight' => '12',
+            'visible' => TRUE,
+          ),
+          'teaser' => array(
+            'weight' => '22',
+            'visible' => FALSE,
+          ),
+        ),
+      ),
     ),
   );
   $export['field_bundle_settings_node__radius_user'] = $strongarm;

@@ -29,7 +29,7 @@ function store_context_default_contexts() {
         'store-store_upsale' => array(
           'module' => 'store',
           'delta' => 'store_upsale',
-          'region' => 'footer',
+          'region' => 'content',
           'weight' => '-10',
         ),
       ),

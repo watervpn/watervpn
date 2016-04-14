@@ -22,6 +22,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -31,15 +42,37 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
-        'weight' => 0,
+        'weight' => 2,
       ),
       'full' => array(
         'label' => 'hidden',
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -49,6 +82,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -58,6 +102,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -67,6 +122,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -76,6 +142,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -85,6 +162,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -94,6 +182,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 0,
@@ -103,6 +202,17 @@ function product_field_default_field_instances() {
         'module' => 'commerce_price',
         'settings' => array(
           'calculation' => 'calculated_sell_price',
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
         ),
         'type' => 'commerce_price_formatted_amount',
         'weight' => 1,
@@ -139,9 +249,21 @@ function product_field_default_field_instances() {
       'default' => array(
         'label' => 'hidden',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
-        'weight' => 1,
+        'weight' => 3,
       ),
       'line_item' => array(
         'label' => 'above',
@@ -152,7 +274,19 @@ function product_field_default_field_instances() {
       'node_teaser' => array(
         'label' => 'hidden',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
         'weight' => 2,
       ),
@@ -173,6 +307,100 @@ function product_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'commerce_product-vpn_service-field_node_type'
+  $field_instances['commerce_product-vpn_service-field_node_type'] = array(
+    'bundle' => 'vpn_service',
+    'commerce_cart_settings' => array(
+      'attribute_field' => 0,
+      'attribute_widget' => 'select',
+      'attribute_widget_title' => 'Node Type',
+    ),
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 6,
+      ),
+      'line_item' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'node_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'commerce_product',
+    'field_name' => 'field_node_type',
+    'label' => 'Node Type',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance: 'commerce_product-vpn_service-field_operation'
+  $field_instances['commerce_product-vpn_service-field_operation'] = array(
+    'bundle' => 'vpn_service',
+    'commerce_cart_settings' => array(
+      'attribute_field' => 0,
+      'attribute_widget' => 'select',
+      'attribute_widget_title' => 'Operation',
+    ),
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 5,
+      ),
+      'line_item' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'node_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'commerce_product',
+    'field_name' => 'field_operation',
+    'label' => 'Operation',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 8,
+    ),
+  );
+
   // Exported field_instance: 'commerce_product-vpn_service-field_type'
   $field_instances['commerce_product-vpn_service-field_type'] = array(
     'bundle' => 'vpn_service',
@@ -184,7 +412,7 @@ function product_field_default_field_instances() {
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 2,
+        'weight' => 7,
       ),
       'line_item' => array(
         'label' => 'above',
@@ -195,7 +423,19 @@ function product_field_default_field_instances() {
       'node_teaser' => array(
         'label' => 'above',
         'module' => 'list',
-        'settings' => array(),
+        'settings' => array(
+          'linked_field' => array(
+            'advanced' => array(
+              'class' => '',
+              'rel' => '',
+              'target' => '',
+              'text' => '',
+              'title' => '',
+            ),
+            'destination' => '',
+            'linked' => 0,
+          ),
+        ),
         'type' => 'list_default',
         'weight' => 4,
       ),
@@ -219,6 +459,8 @@ function product_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Duration');
+  t('Node Type');
+  t('Operation');
   t('Price');
   t('Type');
 

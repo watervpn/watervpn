@@ -5298,6 +5298,9 @@ th.hide-for-touch {
     .page .top-bar .top-bar-section {
       display: block; } }
 
+.logged-in #secondary-menu li:nth-child(2) {
+  display: none; }
+
 .node-slide.node-teaser .field-name-title h2 {
   font-size: 1.75rem;
   line-height: 3.125rem;
@@ -5405,7 +5408,7 @@ th.hide-for-touch {
 .views-exposed-widget .description {
   display: none; }
 
-.view-commerce-cart-form .views-field-edit-quantity {
+.view-commerce-cart-form .views-field-edit-quantity, .view-commerce-cart-form #edit-submit {
   display: none; }
 
 .view-commerce-cart-summary .views-field-quantity {

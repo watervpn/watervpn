@@ -266,6 +266,7 @@ function store_create_radius_user_node($uid, $commerce_order) {
   $radius_user = store_create_radius_user($uid);
 
   $r_user->field_radius_id[LANGUAGE_NONE][0]['value'] = $radius_user['id'];
+  $r_user->field_password[LANGUAGE_NONE][0]['value'] = $radius_user['passwd'];
   $r_user->field_expiry_date[LANGUAGE_NONE][0]['value'] = $expired_date;
   $r_user->field_status[LANGUAGE_NONE][0]['value'] = 1;
 

@@ -62,7 +62,8 @@
 }
 
 .view-commerce-cart-form {
-	.views-field-edit-quantity {
+	.views-field-edit-quantity,
+	#edit-submit {
 		display: none;
 	}
 }

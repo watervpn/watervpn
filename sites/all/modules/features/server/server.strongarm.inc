@@ -93,13 +93,20 @@ function server_strongarm() {
     'extra_fields' => array(
       'form' => array(
         'title' => array(
-          'weight' => '-5',
+          'weight' => '0',
         ),
         'path' => array(
-          'weight' => '30',
+          'weight' => '1',
         ),
       ),
-      'display' => array(),
+      'display' => array(
+        'buttons' => array(
+          'teaser' => array(
+            'weight' => '4',
+            'visible' => TRUE,
+          ),
+        ),
+      ),
     ),
   );
   $export['field_bundle_settings_node__server'] = $strongarm;

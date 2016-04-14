@@ -1,5 +1,0 @@
-name = login Block
-description = Provide a customizable login block.
-core = 7.x
-package = WaterVPN
-version = 7.x-1.0
