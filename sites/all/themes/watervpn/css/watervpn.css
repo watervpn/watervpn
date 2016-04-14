@@ -5405,6 +5405,12 @@ th.hide-for-touch {
 .views-exposed-widget .description {
   display: none; }
 
+.view-commerce-cart-form .views-field-edit-quantity {
+  display: none; }
+
+.view-commerce-cart-summary .views-field-quantity {
+  display: none; }
+
 .breadcrumb {
   margin-top: 20px;
   border: 1px solid #CCC;
