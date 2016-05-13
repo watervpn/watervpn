@@ -7,3 +7,6 @@ sites/*/private
 
 # Ignore local setting files
 sites/default/settings.local.php
+
+# Ignore vender composer directory
+vendor/*
