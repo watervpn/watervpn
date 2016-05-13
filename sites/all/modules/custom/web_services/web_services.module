@@ -30,10 +30,7 @@ function web_services_menu() {
 function web_services_init() {
   // path to composer autoloader
   $auto_load_path = DRUPAL_ROOT . '//vendor/autoload.php';
-
   require_once $auto_load_path;
-  // path to wvpnclient autoloader
-  require_once __DIR__ . '/includes/webservice-client/Autoloader.php';
 }
 
 /**

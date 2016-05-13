@@ -1,0 +1,5 @@
+{
+    "require": {
+        "wvpn/client": "dev-master"
+    }
+}

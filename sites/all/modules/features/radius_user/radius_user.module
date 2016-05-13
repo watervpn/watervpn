@@ -1,4 +1,6 @@
 <?php
+use Wvpn\Client\WebService;
+
 /**
  * @file
  * Code for the Radius User feature.
@@ -74,7 +76,17 @@ function radius_user_product_renew($node, $user) {
  */
 function radius_user_cron() {
   // load radius user with status is active = 1;
+  $expired_raidus_user_nodes = radius_user_get_expired_radius_user_nodes();
+
   // setup a drupal queue api to store loaded radius user;
+  if (!empty($expired_raidus_user_nodes)) {
+
+    $queue = DrupalQueue::get('radius_user');
+    foreach($expired_raidus_user_nodes as $expired_raidus_user_node) {
+      $queue->createItem($expired_raidus_user_node->nid);
+    }
+  }
+
   // foreach radius user, batch api.
   // inside queue excution, check each radius user's expired day against current time.
   // if current radius user expired, then call web service 'radius' and put it in disable group.
@@ -110,6 +122,10 @@ function radius_user_node_view($node, $view_mode, $langcode) {
 
     $links = array(l(t('Select a Server'), $path_server, $options_server), l(t('Renew'), $path_renew, $options_renew));
 
+    if ($node->field_status[LANGUAGE_NONE][0]['value'] == 0) {
+      $links = array(l(t('Renew'), $path_renew, $options_renew));
+    }
+
     $node->content['buttons'] = array (
       '#markup' => theme('download_link', array('links' => $links)),
       '#weight' => 3,
@@ -136,4 +152,128 @@ function radius_user_field_extra_fields() {
     ),
   );
   return $extra;
+}
+
+/**
+ * Get all radius user nodes from db.
+ * @return mixed
+ *  array contains radius node ids or FALSE when no result.
+ */
+function radius_user_get_expired_radius_user_nodes() {
+  // Query all expired radius user nodes.
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_expiry_date', 'fe', 'n.nid = fe.entity_id');
+  $query->join('field_data_field_status', 'fs', 'n.nid = fs.entity_id');
+  $query->fields('n', array('nid', 'type'))
+  ->condition('n.type', 'radius_user')
+  ->condition('fe.field_expiry_date_value', REQUEST_TIME, '<')
+  ->condition('fs.field_status_value', 1);
+
+  $radius_user_nodes = $query->execute()->fetchAll();
+
+  return !empty($radius_user_nodes) ? $radius_user_nodes : FALSE;
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function radius_user_cron_queue_info() {
+  $queues['radius_user'] = array(
+    'worker callback' => 'radius_user_queue_run', // The callback function for each queue item.
+    'time' => 60, // The max run time per cron run in seconds.
+  );
+  return $queues;
+}
+
+/**
+ * The callback function for each queue item
+ * @param $nid node id.
+ */
+function radius_user_queue_run($nid) {
+  radius_user_update_node($nid);
+}
+
+// /**
+//  * The batch process function for radius user node type,
+//  * This function need to be in the module file, don't put it in
+//  * the server.batch.inc file, or it will failed silently.
+//  * @param unknown $server_nodes
+//  * @param unknown $context
+//  */
+// function radius_user_process_server_nodes($radius_user_nodes, &$context) {
+//   // How many server nodes we want to process each time.
+//   $limit = 5;
+
+//   // Update server nodes status.
+//   if (!isset($context['sandbox']['progress'])) {
+//     $context['sandbox']['progress'] = 0;
+//     $context['sandbox']['title'] = '';
+//     $context['sandbox']['max'] = count($radius_user_nodes);
+//     // The starting point the the array.
+//     $start = 0;
+//   }
+//   else {
+//     $start = $context['sandbox']['progress'];
+//   }
+
+//   // Only take a chunk of the nodes to process at a time.
+//   $radius_user_nodes_section = array_slice($radius_user_nodes, $start, $limit);
+
+//   // Process them.
+//   if($context['sandbox']['progress'] < $context['sandbox']['max']){
+
+//     foreach ($radius_user_nodes_section as $radius_user_node) {
+//       // TODO Update radius user nodes contents here.
+//       radius_user_update_node($radius_user_node->nid);
+
+//       // Have to keep track of progress, or we end up in a infinity loop.
+//       $context['sandbox']['progress']++;
+//       $context['results'][] = check_plain($node->title); // Keep a running tab of all of the nodes created.
+//       $context['message'] = $context['sandbox']['progress'] . " of " . $context['sandbox']['max'];
+//     }
+//   }
+
+//   // Check if the batch is finished
+//   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+//     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+//   }
+// }
+
+/**
+ * Programatically update server node's properties.
+ */
+function radius_user_update_node($nid) {
+  $node = node_load($nid);
+
+  if (!empty($node) && $node->type == 'radius_user') {
+    // Make sure we have radius service available.
+    $radius = WebService::getServiceClient('radius');
+
+    try{
+      $radius_user_name = $node->field_radius_id[LANGUAGE_NONE][0]['value'];
+      $response = $radius->getAccount($radius_user_name);
+
+      // We have a this user in raidus db.
+      if ($response->getStatusCode() == 200) {
+        // Update radius service to disable expired account.
+        $update_response = $radius->updateAccount($radius_user_name, array('status' => '0'));
+
+        // Update success, now lets update the drupal part.
+        if ($update_response->getStatusCode() == 200) {
+
+          // Update drupal radius user, set status to 0 == expired.
+          $node->field_status[LANGUAGE_NONE][0]['value'] = 0;
+          node_save($node);
+        }else {
+          watchdog('radius_user', 'Update radius user node [@user] status failed.', array('@user' => $radius_user_name));
+        }
+      }
+    }
+    catch( Wvpn\Client\Exception\EntityNotFoundException $e ){
+      watchdog('radius_user', 'Radius user [@user] not found.', array('@user' => $radius_user_name));
+    }
+    catch( GuzzleHttp\Exception\ClientException $e){
+      watchdog('radius_user', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
+    }
+  }
 }

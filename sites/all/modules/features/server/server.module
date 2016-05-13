@@ -1,9 +1,10 @@
 <?php
+use Wvpn\Client\WebService;
+
 /**
  * @file
  * Code for the Server feature.
  */
-
 include_once 'server.features.inc';
 
 /**
@@ -36,10 +37,58 @@ function server_menu() {
 
 function server_test_page() {
 
-  $user = user_load(84);
-dsm($user);
-  // Save existing radius users for the current drupal user.
-//   $radius_user_existed_uids = $user->field_radius_user_reference[LANGUAGE_NONE][0]['target_id'];
+//   $server = node_load(23);
+
+//   // Make sure we have radius service available.
+//   $openvpn = WebService::getServiceClient('openvpn');
+//   $host = $server->field_server_name[LANGUAGE_NONE][0]['value'];
+
+//   try{
+//     $response = $openvpn->getServerStatus($host);
+
+//     // We have a this user in raidus db.
+//     if ($response->getStatusCode() == 200) {
+
+//       dsm($response->json());
+
+//       // Update server node's load.
+//       // server status high. tid 15. over 75% compacity.
+
+//       // server status normal. tid 14. between 30% to 75% compacity.
+
+//       // server status low. tid 16.  below 30% compacity.
+
+//       // server status recommended. tid 13. below 20% compacity.
+//       //       $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
+
+
+
+
+//       $server_response = $response->json();
+
+//       $download_avail = $server_response['download_avail'];
+
+//       $download = $server_response['download'];
+
+//       if ($download / $download_avail < 0.2) {
+//         $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
+//       }
+
+
+//       // Server is up. tid 17.
+//       $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 17;
+//     }
+//     else {
+//       // Update server node's status.
+//       // If no respond from web service then we assume server went down. tid 24.
+//       $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 24;
+//     }
+
+//     node_save($server);
+//   }
+//   catch(GuzzleHttp\Exception\ClientException $e){
+//     watchdog('server', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
+//   }
 
   return '';
 }
@@ -192,9 +241,61 @@ function server_process_server_nodes($server_nodes, &$context) {
 function server_update_node($nid) {
   $node = node_load($nid);
   if ($node->type == 'server') {
-    // TODO call webservices to update properties.
+    // Make sure we have radius service available.
+    $openvpn = WebService::getServiceClient('openvpn');
+    $host = $node->field_server_name[LANGUAGE_NONE][0]['value'];
 
-//     node_save($node);
+    try{
+      $response = $openvpn->getServerStatus($host);
+
+      // We have a this user in raidus db.
+      if ($response->getStatusCode() == 200) {
+        $server_response = $response->json();
+        $download_avail = $server_response['download_avail'];
+        $download = $server_response['download'];
+        $upload_avail = $server_response['upload_avail'];
+        $upload = $server_response['upload'];
+
+        $current_dl_compacity = $download / $download_avail;
+        $current_ul_compacity = $upload / $upload_avail;
+
+        $current_compacity = ($current_dl_compacity + $current_ul_compacity) / 2;
+
+        // Update server node's load.
+        // server status high. tid 15. greater 75% compacity.
+        if ($current_compacity > 0.75 ) {
+          $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 15;
+        }
+
+        // server status normal. tid 14. between 30% to 75% compacity.
+        if ($current_compacity > 0.3 && $current_compacity < 0.75) {
+          $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 14;
+        }
+
+        // server status low. tid 16.  below 30% compacity.
+        if ($current_compacity < 0.3) {
+          $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 16;
+        }
+
+        // server status recommended. tid 13. below 20% compacity.
+        if ($current_compacity < 0.2) {
+          $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
+        }
+
+        // Server is up. tid 17.
+        $node->field_server_status[LANGUAGE_NONE][0]['tid'] = 17;
+      }
+      else {
+        // Update server node's status.
+        // If no respond from web service then we assume server went down. tid 24.
+        $node->field_server_status[LANGUAGE_NONE][0]['tid'] = 24;
+      }
+
+      node_save($node);
+    }
+    catch(GuzzleHttp\Exception\ClientException $e){
+      watchdog('server', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
+    }
   }
 }
 
@@ -202,10 +303,22 @@ function server_update_node($nid) {
  * Implements hook_cron().
  */
 function server_cron() {
-  $radius_nodes = server_get_server_nodes();
+  $server_nodes = server_get_server_nodes();
   $queue = DrupalQueue::get('servers');
-  foreach($radius_nodes as $radius_node) {
-    $queue->createItem($radius_node->nid);
+  foreach($server_nodes as $server_node) {
+    $queue->createItem($server_node->nid);
+  }
+
+  /**
+   * Exception 200 status code
+   */
+  $openvpn  = WebService::getServiceClient('openvpn');
+  $async    = 'true';
+  try{
+    $response = $openvpn->fetchServerStatusJob($async);
+  }
+  catch( GuzzleHttp\Exception\ClientException $e){
+    echo "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]";
   }
 }
 
