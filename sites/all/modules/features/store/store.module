@@ -1,4 +1,6 @@
 <?php
+use Wvpn\Client\WebService;
+
 /**
  * @file
  * Code for the Store feature.
@@ -174,9 +176,94 @@ function store_rules_action_info() {
 
 /**
  * Rules call back function.
+ * It handle two kind of operation after checkout:
+ * 1) create radius user and and drupal user, link then together
+ * 2) renew existing radiuser user node.
  * @param obj $commerce_order
  */
 function store_actions_vpn_account_setup($commerce_order) {
+  // If user renewing the radius node then we only need to update the node instead create a new one.
+  if (isset($_SESSION['renew']) && isset($_SESSION['renew_nid']) && $_SESSION['renew'] == TRUE) {
+    // We need to figure out which node we are renewing.
+    store_renew_radius_user($_SESSION['renew_nid'], $commerce_order);
+
+    // We already identified the renew operation, so let's remove the session variable that we don't need.
+    unset($_SESSION['renew']);
+    unset($_SESSION['renew_nid']);
+  }
+  else {
+    store_create_new_radius_user($commerce_order);
+  }
+}
+
+/**
+ * Update the existing radius node status, after comemrce order completed.
+ * @param int $nid the radius node id that need to be updated.
+ * @param Obj $commerce_order commerce order object.
+ */
+function store_renew_radius_user($nid, $commerce_order) {
+  global $user;
+
+  $radius_node = node_load($nid);
+  // Getting the expired date value from the commerce product.
+  // Radius node already expried.
+  if (!empty($commerce_order->commerce_line_items[LANGUAGE_NONE][0]['line_item_id'])) {
+    $line_item_id = $commerce_order->commerce_line_items[LANGUAGE_NONE][0]['line_item_id'];
+    $line_item = commerce_line_item_load($line_item_id);
+
+    if (!empty($line_item->commerce_product[LANGUAGE_NONE][0]['product_id'])) {
+      $product_id = $line_item->commerce_product[LANGUAGE_NONE][0]['product_id'];
+      $product = commerce_product_load($product_id);
+
+      if (!empty($product->field_duration[LANGUAGE_NONE][0]['value'])) {
+        $duration_day = $product->field_duration[LANGUAGE_NONE][0]['value'];
+        $expired_date = strtotime('+' . $duration_day . ' days');
+      }
+    }
+  }
+  // @TODO IMPORTANT!!! For radius node that is not expired. Use the remaining date plus the new duration.
+
+  // Update the expired radius node.
+  if (isset($expired_date)) {
+    $radius_node->field_expiry_date[LANGUAGE_NONE][0]['value'] = $expired_date;
+  }
+  else {
+    watchdog('store', "variable exipired_date not set in store_renew_radius_user method.");
+  }
+
+  $radius_node->field_status[LANGUAGE_NONE][0]['value'] = 1;
+
+  try {
+    node_save($radius_node);
+  }
+  catch (Exception $e) {
+    watchdog('store', 'Radius user update failed. ' . $e->getMessage());
+  }
+
+  $radius_user_uid = $radius_node->field_radius_id[LANGUAGE_NONE][0]['value'];
+  $data = array(
+    "status" => "1"
+  );
+
+  // Update raidus db and remove the radius account from the disable group.
+  try{
+    $radius = WebService::getServiceClient('radius');
+    $radius->updateAccount($radius_user_uid, $data );
+    $response = $radius->updateAccount($radius_user_uid, $data );
+  }
+  catch(WvpnClient\Exception\EntityNotFoundException $e){
+    echo "Account Not found ". $e->getMessage();
+  }
+  catch(GuzzleHttp\Exception\ClientException $e){
+    echo "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]";
+  }
+}
+
+/**
+ * For new order, we are going to create radius node.
+ * @param unknown $commerce_order
+ */
+function store_create_new_radius_user($commerce_order) {
   // Don't create user if user already logged in.
   global $user;
 
@@ -200,13 +287,14 @@ function store_actions_vpn_account_setup($commerce_order) {
 
   // Load radius user via REST;
   try{
-    $radius = WvpnClient\WebService::getServiceClient('radius');
+    $radius = WebService::getServiceClient('radius');
     $response = $radius->getAccount($radius_user_uid);
     $response = $response->json();
-  }catch( WvpnClient\Exception\EntityNotFoundException $e ){
+  }
+  catch(WvpnClient\Exception\EntityNotFoundException $e){
     echo "Account Not found ". $e->getMessage();
   }
-  catch( GuzzleHttp\Exception\ClientException $e){
+  catch(GuzzleHttp\Exception\ClientException $e){
     echo "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]";
   }
 
@@ -216,7 +304,7 @@ function store_actions_vpn_account_setup($commerce_order) {
 
   $to = $user->mail; // new user's email.
   $params = array(
-  	'body' => "<p>Hello $user->name </p><p>Your VPN account is: $radius_user_uid</p><p>Your password: $radius_user_pw</p>",
+    'body' => "<p>Hello $user->name </p><p>Your VPN account is: $radius_user_uid</p><p>Your password: $radius_user_pw</p>",
   );
 
   drupal_mail('store', 'watervpn_store_create_account', $to, user_preferred_language($user), $params);
@@ -254,6 +342,8 @@ function store_create_radius_user_node($uid, $commerce_order) {
     if (!empty($line_item->commerce_product[LANGUAGE_NONE][0]['product_id'])) {
       $product_id = $line_item->commerce_product[LANGUAGE_NONE][0]['product_id'];
       $product = commerce_product_load($product_id);
+      // Set reference product id, we will use this information when user renew their raidus user node.
+      $r_user->field_product_reference[LANGUAGE_NONE][0]['product_id'] = $product_id;
 
       if (!empty($product->field_duration[LANGUAGE_NONE][0]['value'])) {
         $duration_day = $product->field_duration[LANGUAGE_NONE][0]['value'];
@@ -267,7 +357,14 @@ function store_create_radius_user_node($uid, $commerce_order) {
 
   $r_user->field_radius_id[LANGUAGE_NONE][0]['value'] = $radius_user['id'];
   $r_user->field_password[LANGUAGE_NONE][0]['value'] = $radius_user['passwd'];
-  $r_user->field_expiry_date[LANGUAGE_NONE][0]['value'] = $expired_date;
+
+  if (isset($expired_date)) {
+    $r_user->field_expiry_date[LANGUAGE_NONE][0]['value'] = $expired_date;
+  }
+  else {
+    watchdog('store', "variable exipired_date not set in store_create_radius_user_node method.");
+  }
+
   $r_user->field_status[LANGUAGE_NONE][0]['value'] = 1;
 
   try {
@@ -315,7 +412,7 @@ function store_create_drupal_user($commerce_order) {
  * @param unknown $uid
  */
 function store_create_radius_user($uid) {
-  $radius = WvpnClient\WebService::getServiceClient('radius');
+  $radius = WebService::getServiceClient('radius');
 
 //   $account_name = 'vpn_' . store_get_hashid($uid);
 

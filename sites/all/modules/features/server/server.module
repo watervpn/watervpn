@@ -37,58 +37,58 @@ function server_menu() {
 
 function server_test_page() {
 
-//   $server = node_load(23);
+  $server = node_load(23);
 
-//   // Make sure we have radius service available.
-//   $openvpn = WebService::getServiceClient('openvpn');
-//   $host = $server->field_server_name[LANGUAGE_NONE][0]['value'];
+  // Make sure we have radius service available.
+  $openvpn = WebService::getServiceClient('openvpn');
+  $host = $server->field_server_name[LANGUAGE_NONE][0]['value'];
 
-//   try{
-//     $response = $openvpn->getServerStatus($host);
+  try{
+    $response = $openvpn->getServerStatus($host);
 
-//     // We have a this user in raidus db.
-//     if ($response->getStatusCode() == 200) {
+    // We have a this user in raidus db.
+    if ($response->getStatusCode() == 200) {
 
-//       dsm($response->json());
+      dsm($response->json());
 
-//       // Update server node's load.
-//       // server status high. tid 15. over 75% compacity.
+      // Update server node's load.
+      // server status high. tid 15. over 75% compacity.
 
-//       // server status normal. tid 14. between 30% to 75% compacity.
+      // server status normal. tid 14. between 30% to 75% compacity.
 
-//       // server status low. tid 16.  below 30% compacity.
+      // server status low. tid 16.  below 30% compacity.
 
-//       // server status recommended. tid 13. below 20% compacity.
-//       //       $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
-
-
+      // server status recommended. tid 13. below 20% compacity.
+      //       $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
 
 
-//       $server_response = $response->json();
-
-//       $download_avail = $server_response['download_avail'];
-
-//       $download = $server_response['download'];
-
-//       if ($download / $download_avail < 0.2) {
-//         $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
-//       }
 
 
-//       // Server is up. tid 17.
-//       $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 17;
-//     }
-//     else {
-//       // Update server node's status.
-//       // If no respond from web service then we assume server went down. tid 24.
-//       $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 24;
-//     }
+      $server_response = $response->json();
+
+      $download_avail = $server_response['download_avail'];
+
+      $download = $server_response['download'];
+
+      if ($download / $download_avail < 0.2) {
+        $server->field_server_load[LANGUAGE_NONE][0]['tid'] = 13;
+      }
+
+
+      // Server is up. tid 17.
+      $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 17;
+    }
+    else {
+      // Update server node's status.
+      // If no respond from web service then we assume server went down. tid 24.
+      $server->field_server_status[LANGUAGE_NONE][0]['tid'] = 24;
+    }
 
 //     node_save($server);
-//   }
-//   catch(GuzzleHttp\Exception\ClientException $e){
-//     watchdog('server', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
-//   }
+  }
+  catch(GuzzleHttp\Exception\ClientException $e){
+    watchdog('server', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
+  }
 
   return '';
 }

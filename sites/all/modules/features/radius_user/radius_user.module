@@ -38,8 +38,7 @@ function radius_user_porduct_renew_access_callback($node, $user) {
     drupal_set_message(t('Please login to renew your service.'));
   }
 
-  if (user_is_logged_in() && $GLOBALS['user']->uid == $user->uid && $node->type == 'radius_user') {
-    // TODO also check if the current radius node were referenced by user.
+  if (user_is_logged_in() && $node->type == 'radius_user') {
     return TRUE;
   }
 
@@ -52,22 +51,39 @@ function radius_user_porduct_renew_access_callback($node, $user) {
  * @param Object $user user who referencing node.
  */
 function radius_user_product_renew($node, $user) {
-  $renew = FALSE;
-  $nid = 0;
+  // set product reference on radius user node after purchase.
 
-  // Get the original product id;
-  // TODO use entity reference to
+  // 1) create a product line item
+  $product_id = $node->field_product_reference[LANGUAGE_NONE][0]['product_id'];
 
-  $sql = new EntityFieldQuery();
-  $results = $sql->entityCondition('entity_type', 'commerce_product')
-    ->entityCondition('bundle', 'vpn_service')
-    ->propertyCondition('status', 1)
-    ->fieldCondition('field_type', 'value', 'lite')
-//     ->fieldCondition('field_quantity', 'value', 1)
-    ->execute();
+  $order = commerce_order_new($user->uid, 'checkout_checkout');
+  // Save the order to get its ID.
+  commerce_order_save($order);
 
-  dsm('---');
-  dsm($results);
+  $product = commerce_product_load($product_id);
+  $line_item = commerce_product_line_item_new($product, 1, $order->order_id);
+
+  // Save the line item to get its ID.
+  commerce_line_item_save($line_item);
+
+  // 2) send it to cart
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+  $order_wrapper->commerce_line_items[] = $line_item;
+
+  // Save the order again to update its line item reference field.
+  commerce_order_save($order);
+
+  // We are going to set two session variable in order to identify the renew process.
+  $_SESSION['renew'] = TRUE;
+  $_SESSION['renew_nid'] = $node->nid;
+
+  drupal_goto('checkout/' . $order->order_id);
+
+  // 3) set radius node status to 1 and expired date according to comerce product length, after payment confirmed
+  // See store_actions_vpn_account_setup function in store.module
+
+  // 4) call raidus web service and move user from disabled group to normal group
+  // See store_renew_radius_user function in store.module
 }
 
 
@@ -109,7 +125,7 @@ function radius_user_node_view($node, $view_mode, $langcode) {
       'attributes' => array(
         'class' => array('button', 'renew'),
       ),
-      'query' => drupal_get_destination(),
+//       'query' => drupal_get_destination(),
     );
 
     $options_server = array(
@@ -130,7 +146,6 @@ function radius_user_node_view($node, $view_mode, $langcode) {
       '#markup' => theme('download_link', array('links' => $links)),
       '#weight' => 3,
     );
-
   }
 }
 
@@ -274,6 +289,18 @@ function radius_user_update_node($nid) {
     }
     catch( GuzzleHttp\Exception\ClientException $e){
       watchdog('radius_user', "ErrorCode: [{$e->getCode()}] Message: [{$e->getMessage()}]");
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ * Add expired class to expiration radius user node.
+ */
+function radius_user_preprocess_field(&$vars) {
+  if ($vars['element']['#field_name'] = 'field_status') {
+    if (isset($vars['element']['#items'][0]['value']) && $vars['element']['#items'][0]['value'] == 0) {
+      $vars['classes_array'][] = 'expired';
     }
   }
 }

@@ -5423,6 +5423,9 @@ th.hide-for-touch {
 table {
   width: 100%; }
 
+.button {
+  text-transform: uppercase; }
+
 
 .node-server.node-teaser, .node-radius-user.node-teaser {
   border: 1px solid #CCC;
@@ -5444,7 +5447,11 @@ table {
     font-size: 1.375rem;
     line-height: 1.5625rem; }
   .node-server.node-teaser .field-name-field-status .active, .node-radius-user.node-teaser .field-name-field-status .active {
+    text-transform: capitalize;
     color: green; }
+  .node-server.node-teaser .field-name-field-status.expired .active, .node-radius-user.node-teaser .field-name-field-status.expired .active {
+    text-transform: capitalize;
+    color: red; }
   .node-server.node-teaser ul, .node-radius-user.node-teaser ul {
     list-style: none;
     margin: 0; }
@@ -5456,7 +5463,8 @@ table {
     margin-left: 0;
     padding-top: 5px; }
     .node-server.node-teaser .buttons-group a, .node-radius-user.node-teaser .buttons-group a {
-      margin-bottom: 10px; }
+      margin-bottom: 10px;
+      width: 100%; }
 
 .section-store .view-store .node-product-display.node-teaser {
   border: 1px solid #DDD;
