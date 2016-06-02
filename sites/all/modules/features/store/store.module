@@ -221,7 +221,13 @@ function store_renew_radius_user($nid, $commerce_order) {
       }
     }
   }
-  // @TODO IMPORTANT!!! For radius node that is not expired. Use the remaining date plus the new duration.
+
+  // If the current radius usr node is not expired yet, then we recalculate the expirate date.
+  // Adding the new duration on top on the raminding dates.
+  if (isset($radius_node->field_status[LANGUAGE_NONE][0]['value']) && $radius_node->field_status[LANGUAGE_NONE][0]['value'] != 0) {
+    $remaining = $radius_node->field_expiry_date[LANGUAGE_NONE][0]['value'];
+    $expired_date = strtotime('+' . $duration_day . ' days', $remaining);
+  }
 
   // Update the expired radius node.
   if (isset($expired_date)) {
